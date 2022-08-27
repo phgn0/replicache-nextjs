@@ -5,6 +5,7 @@ import { getPokeReceiver } from "./poke.js";
 export interface UseReplicacheOptions<M extends MutatorDefs>
   extends Omit<ReplicacheOptions<M>, "licenseKey" | "name"> {
   name?: string;
+  apiHost?: string;
 }
 
 /**
@@ -32,8 +33,8 @@ export function useReplicache<M extends MutatorDefs>({
       // See https://doc.replicache.dev/licensing for how to get a license key.
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       licenseKey: process.env.NEXT_PUBLIC_REPLICACHE_LICENSE_KEY!,
-      pushURL: `/api/replicache/push?spaceID=${name}`,
-      pullURL: `/api/replicache/pull?spaceID=${name}`,
+      pushURL: `${options.apiHost || ''}/api/replicache/push?spaceID=${name}`,
+      pullURL: `${options.apiHost || ''}/api/replicache/pull?spaceID=${name}`,
       name,
       ...options,
     });
