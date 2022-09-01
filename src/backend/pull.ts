@@ -29,11 +29,8 @@ export async function pull(
   const pull = pullRequest.parse(requestBody);
   const requestCookie = pull.cookie;
 
-  console.log("spaceID", spaceID);
-  console.log("clientID", pull.clientID);
-  const t0 = Date.now();
-
   // get changed entries
+  const t0 = Date.now();
   let [entries, lastMutationID, responseCookieVersion] = await transact(
     async (executor) => {
       return Promise.all([
@@ -43,10 +40,12 @@ export async function pull(
       ]);
     }
   );
+  console.log(`Read changed entries in ${Date.now() - t0}ms`);
   if (responseCookieVersion === undefined) {
     throw new Error(`Unknown space ${spaceID}`);
   }
 
+  const t1 = Date.now();
   let partialSyncState: PartialSyncState;
   if (!requestCookie) {
     // initial pull, do not return fulltext entries
@@ -74,7 +73,11 @@ export async function pull(
         const incrementalEntries = fulltextEntries
           .filter((e) => e[0] > startKey)
           .slice(0, limit);
-        const endSyncOrder = incrementalEntries[-1]?.[0];
+        const endSyncOrder =
+          incrementalEntries[incrementalEntries.length - 1]?.[0];
+        console.log(
+          `Returning ${incrementalEntries.length} partial entries from ${startKey} to ${endSyncOrder}`
+        );
 
         entries = [...entries, ...incrementalEntries];
 
@@ -90,13 +93,16 @@ export async function pull(
       });
     }
   }
+  console.log(`Processed partial sync in ${Date.now() - t1}ms`);
 
   // create sync state entry to re-trigger pull in frontend
-  entries.push([
-    PARTIAL_SYNC_STATE_KEY,
-    JSON.stringify(partialSyncState),
-    false,
-  ]);
+  if (requestCookie?.partialSync !== partialSyncState) {
+    entries.push([
+      PARTIAL_SYNC_STATE_KEY,
+      JSON.stringify(partialSyncState),
+      false,
+    ]);
+  }
 
   // set cookie for next pull
   const responseCookie = {
@@ -106,7 +112,6 @@ export async function pull(
 
   console.log("lastMutationID: ", lastMutationID);
   console.log("responseCookie: ", responseCookie);
-  console.log("Read all objects in", Date.now() - t0);
 
   const resp: PullResponse = {
     lastMutationID: lastMutationID ?? 0,
@@ -129,6 +134,6 @@ export async function pull(
     }
   }
 
-  console.log(`Returning`, JSON.stringify(resp, null, ""));
+  console.log(`Returning ${resp.patch.length} entries\n`);
   return resp;
 }

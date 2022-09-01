@@ -10,6 +10,7 @@
     "format": "prettier --write 'src/*/*.{js,jsx,json,ts,tsx,html,css,md}' '*.{cjs,js,jsx,json,ts,tsx,html,css,md}'",
     "check-format": "prettier --check 'src/*.{js,jsx,json,ts,tsx,html,css,md}' '*.{cjs,js,jsx,json,ts,tsx,html,css,md}'",
     "lint": "eslint --ext .ts,.tsx,.js,.jsx src/",
+    "watch": "tsc -w",
     "build": "rm -rf lib && tsc",
     "prepack": "npm run lint && npm run build",
     "pretest": "npm run build",

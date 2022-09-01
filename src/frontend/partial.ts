@@ -18,5 +18,5 @@ export async function getPartialSyncState(
   if (val === undefined) {
     return undefined;
   }
-  return partialSyncStateSchema.parse(val);
+  return partialSyncStateSchema.parse(JSON.parse(val?.toString() || "null"));
 }
