@@ -1,5 +1,6 @@
 {
-  "name": "replicache-nextjs",
+  "name": "@unclutter/replicache-nextjs",
+  "private": true,
   "version": "0.3.0",
   "description": "Generic Replicache backend on Next.js",
   "homepage": "https://github.com/rocicorp/replicache-nextjs",
